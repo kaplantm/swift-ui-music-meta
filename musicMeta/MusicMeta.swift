@@ -15,7 +15,7 @@ class MusicMeta {
     private let fileName = "musicMeta.csv"
 
     static var isMusicAuthorized : Bool = false;
-    var songData : [[String : Any]] = []
+    var songData : [SongType] = []
     
     func requestMusicAuth(_ callback: @escaping ()->()) {
         let status : MPMediaLibraryAuthorizationStatus = MPMediaLibrary.authorizationStatus()
@@ -45,38 +45,49 @@ class MusicMeta {
     }
     
     func generateSongData() {
-      let myPlaylistQuery = MPMediaQuery.songs()
-      let items : [MPMediaItem] = myPlaylistQuery.items ?? []
+      let myMediaQuery = MPMediaQuery.songs()
+      let predicate = MPMediaPropertyPredicate(value: "I'm Just A Kid", forProperty: MPMediaItemPropertyTitle)
+      myMediaQuery.addFilterPredicate(predicate)
+      let items : [MPMediaItem] = myMediaQuery.items ?? []
 
-        self.songData = items.map { [
-        "title": $0.title ?? "" as String,
-        "artist": $0.artist ?? "" as String,
-        "albumTitle": $0.albumTitle ?? "" as String,
-        "playCount":$0.playCount,
-        "dateAdded":$0.dateAdded,
-        "genre":$0.genre ?? "" as String,
-        "beatsPerMinute":$0.beatsPerMinute,
-        "playbackDuration":$0.playbackDuration,
-        "skipCount":$0.skipCount,
-        "isExplicitItem":$0.isExplicitItem,
-        "releaseDate":$0.releaseDate ?? "" as Any,
-        "isCloudItem":$0.isCloudItem,
-        "artistPersistentID":$0.artistPersistentID,
-        "persistentID":$0.persistentID,
-        "genrePersistentID":$0.genrePersistentID
-        ] as [String:Any]}
+        self.songData = items.map {
+            SongType(
+              title: getSongFormattedSongAttr($0.title),
+              artist: getSongFormattedSongAttr($0.artist),
+              albumTitle: getSongFormattedSongAttr($0.albumTitle),
+              playCount:$0.playCount,
+              dateAdded:$0.dateAdded,
+              genre:getSongFormattedSongAttr($0.genre),
+              beatsPerMinute:$0.beatsPerMinute,
+              playbackDuration:$0.playbackDuration,
+              skipCount:$0.skipCount,
+              isExplicitItem:getSongFormattedSongAttr($0.isExplicitItem),
+              releaseDate:$0.releaseDate,
+              isCloudItem:getSongFormattedSongAttr($0.isCloudItem),
+              artistPersistentID:getSongFormattedSongAttr($0.artistPersistentID),
+              persistentID:getSongFormattedSongAttr($0.persistentID),
+              genrePersistentID:getSongFormattedSongAttr($0.genrePersistentID)
+            )
+        }
     }
     
-    func getSongAttr(song:[String:Any?], attr:String) -> String {
-        return "\"\(String(describing: (song[attr] ?? "")!))\""
+    func getSongFormattedSongAttr(_ attr: Any?) -> String {
+        let result : String = String(describing: (attr ?? "")!)
+        if(result == "\"\""){
+            return "Unknown"
+        }
+        if(result.contains(",")){
+            return "\"\(result)\""
+        }
+        return result
     }
     
     func formatSongData() -> String{
         var csvString = "\("Title"),\("Artist"),\("AlbumTitle"),\("PlayCount"),\("dateAdded"),\("genre"),\("beatsPerMinute"),\("playbackDuration"),\("skipCount"),\("isExplicitItem"),\("releaseDate"),\("isCloudItem"),\("artistPersistentID"),\("persistentID"),\("genrePersistentID")\n\n"
         
-        let comma : String = ","
+        let c : String = ","
         for song in self.songData {
-           csvString = csvString.appending("\(getSongAttr(song: song, attr: "title")+comma+getSongAttr(song: song, attr: "artist")+comma+getSongAttr(song: song, attr: "albumTitle")+comma+getSongAttr(song: song, attr: "playCount")+comma+getSongAttr(song: song, attr: "dateAdded")+comma+getSongAttr(song: song, attr: "genre")+comma+getSongAttr(song: song, attr: "beatsPerMinute")+comma+getSongAttr(song: song, attr: "playbackDuration")+comma+getSongAttr(song: song, attr: "skipCount")+comma+getSongAttr(song: song, attr: "isExplicitItem")+comma+getSongAttr(song: song, attr: "mediaType")+comma+getSongAttr(song: song, attr: "releaseDate")+comma+getSongAttr(song: song, attr: "isCloudItem")+comma+getSongAttr(song: song, attr: "artistPersistentID")+comma+getSongAttr(song: song, attr: "persistentID")+comma+getSongAttr(song: song, attr: "genrePersistentID"))\n")
+            csvString = csvString.appending("\(song.title+c+song.artist+c+song.albumTitle+c+getSongFormattedSongAttr(song.playCount)+c+getSongFormattedSongAttr(song.dateAdded)+c+song.genre+c+getSongFormattedSongAttr(song.beatsPerMinute)+c+getSongFormattedSongAttr(song.playbackDuration)+c+getSongFormattedSongAttr(song.skipCount)+c+song.isExplicitItem+c+getSongFormattedSongAttr(song.releaseDate)+c+song.isCloudItem+c+song.artistPersistentID+c+song.persistentID+c+song.genrePersistentID)\n")
          }
         
         return csvString

@@ -32,8 +32,8 @@ struct ContentView: View {
                 
                 CircleImage(image: "lightbg")
                     .frame(width:200, height: 200)
-                  .offset(y: -150)
-                  .padding(.bottom, -150)
+                  .offset(y: -200)
+                  .padding(.bottom, -200)
 
                 VStack(alignment: .leading) {
                   Text("MetaMusic")
