@@ -15,7 +15,7 @@ class MusicMeta {
     private let fileName = "musicMeta.csv"
 
     static var isMusicAuthorized : Bool = false;
-    var songData : [SongType] = []
+    var songData : [SongItem] = []
     
     func requestMusicAuth(_ callback: @escaping ()->()) {
         let status : MPMediaLibraryAuthorizationStatus = MPMediaLibrary.authorizationStatus()
@@ -46,48 +46,46 @@ class MusicMeta {
     
     func generateSongData() {
       let myMediaQuery = MPMediaQuery.songs()
-      let predicate = MPMediaPropertyPredicate(value: "I'm Just A Kid", forProperty: MPMediaItemPropertyTitle)
-      myMediaQuery.addFilterPredicate(predicate)
+//      let predicate = MPMediaPropertyPredicate(value: "Green Day", forProperty: MPMediaItemPropertyArtist)
+//      myMediaQuery.addFilterPredicate(predicate)
       let items : [MPMediaItem] = myMediaQuery.items ?? []
 
-        self.songData = items.map {
-            SongType(
-              title: getSongFormattedSongAttr($0.title),
-              artist: getSongFormattedSongAttr($0.artist),
-              albumTitle: getSongFormattedSongAttr($0.albumTitle),
-              playCount:$0.playCount,
-              dateAdded:$0.dateAdded,
-              genre:getSongFormattedSongAttr($0.genre),
-              beatsPerMinute:$0.beatsPerMinute,
-              playbackDuration:$0.playbackDuration,
-              skipCount:$0.skipCount,
-              isExplicitItem:getSongFormattedSongAttr($0.isExplicitItem),
-              releaseDate:$0.releaseDate,
-              isCloudItem:getSongFormattedSongAttr($0.isCloudItem),
-              artistPersistentID:getSongFormattedSongAttr($0.artistPersistentID),
-              persistentID:getSongFormattedSongAttr($0.persistentID),
-              genrePersistentID:getSongFormattedSongAttr($0.genrePersistentID)
-            )
+        self.songData = items.map { entity in
+            return SongItem(song: entity)
         }
     }
     
-    func getSongFormattedSongAttr(_ attr: Any?) -> String {
-        let result : String = String(describing: (attr ?? "")!)
-        if(result == "\"\""){
-            return "Unknown"
-        }
-        if(result.contains(",")){
-            return "\"\(result)\""
-        }
-        return result
-    }
+    func formatStringForCSV(value: String) -> String {
+          if(value == "\"\""){
+              return "Unknown"
+          }
+          if(value.contains(",")){
+              return "\"\(value)\""
+          }
+          return value
+      }
     
-    func formatSongData() -> String{
-        var csvString = "\("Title"),\("Artist"),\("AlbumTitle"),\("PlayCount"),\("dateAdded"),\("genre"),\("beatsPerMinute"),\("playbackDuration"),\("skipCount"),\("isExplicitItem"),\("releaseDate"),\("isCloudItem"),\("artistPersistentID"),\("persistentID"),\("genrePersistentID")\n\n"
-        
-        let c : String = ","
-        for song in self.songData {
-            csvString = csvString.appending("\(song.title+c+song.artist+c+song.albumTitle+c+getSongFormattedSongAttr(song.playCount)+c+getSongFormattedSongAttr(song.dateAdded)+c+song.genre+c+getSongFormattedSongAttr(song.beatsPerMinute)+c+getSongFormattedSongAttr(song.playbackDuration)+c+getSongFormattedSongAttr(song.skipCount)+c+song.isExplicitItem+c+getSongFormattedSongAttr(song.releaseDate)+c+song.isCloudItem+c+song.artistPersistentID+c+song.persistentID+c+song.genrePersistentID)\n")
+    func formatStringArrayForCSV(array: [String]) -> String {
+        print("formatStringDictForCSV")
+        print(array)
+        return array.reduce("") {
+            (accumulation: String, nextValue: String) -> String in
+            return accumulation + formatStringForCSV(value: nextValue) + ","
+        }
+     }
+ 
+    func formatSongData() -> String {
+        let fields : [String] = ["title","artist","albumTitle","playCount","dateAdded","genre","beatsPerMinute","playbackDuration","skipCount","isExplicitItem","releaseDate", "isCloudItem","artistPersistentID","persistentID","genrePersistentID"]
+        var csvString = fields.reduce("") {
+            (accumulation: String, nextValue: String) -> String in
+            return accumulation + nextValue.getWithCapitalizedFirstLetter() + ","
+        }
+        csvString.append("\n\n")
+
+        for songClass in self.songData {
+            print("in songData iterable", self.songData.count)
+            let songFieldArray : [String] = songClass.asFieldsArray(fields: fields);
+            csvString = csvString.appending("\(formatStringArrayForCSV(array: songFieldArray))\n")
          }
         
         return csvString
