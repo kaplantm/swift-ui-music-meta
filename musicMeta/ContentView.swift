@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentView: View {
     var color1 = Color(red: 0.2, green: 0.2, blue: 0.2)
     var color2 = Color(red: 0.4, green: 0.4, blue: 0.4)
+    let musicMeta = MusicMeta()
 
     
     var body: some View {
@@ -37,7 +38,7 @@ struct ContentView: View {
 
                 
                 Button(action: {
-                    print("Delete tapped!")
+                    self.musicMeta.generateMeta()
                 }) {
                     HStack {
                         Image(systemName: "music.note.list")

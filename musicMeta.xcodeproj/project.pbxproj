@@ -17,6 +17,7 @@
 		786A69FA248C8E6F001A29A2 /* musicMetaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A69F9248C8E6F001A29A2 /* musicMetaUITests.swift */; };
 		786A6A08248C9739001A29A2 /* CircleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A6A07248C9739001A29A2 /* CircleImage.swift */; };
 		786A6A0A248C99C3001A29A2 /* HeaderImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A6A09248C99C3001A29A2 /* HeaderImage.swift */; };
+		78AE6A67248CA9B400F4A5E9 /* MusicMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78AE6A66248CA9B400F4A5E9 /* MusicMeta.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		786A69FB248C8E6F001A29A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		786A6A07248C9739001A29A2 /* CircleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleImage.swift; sourceTree = "<group>"; };
 		786A6A09248C99C3001A29A2 /* HeaderImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderImage.swift; sourceTree = "<group>"; };
+		78AE6A66248CA9B400F4A5E9 /* MusicMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMeta.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				786A69DF248C8E6F001A29A2 /* Preview Content */,
 				786A6A07248C9739001A29A2 /* CircleImage.swift */,
 				786A6A09248C99C3001A29A2 /* HeaderImage.swift */,
+				78AE6A66248CA9B400F4A5E9 /* MusicMeta.swift */,
 			);
 			path = musicMeta;
 			sourceTree = "<group>";
@@ -277,6 +280,7 @@
 				786A6A08248C9739001A29A2 /* CircleImage.swift in Sources */,
 				786A69DA248C8E6B001A29A2 /* SceneDelegate.swift in Sources */,
 				786A6A0A248C99C3001A29A2 /* HeaderImage.swift in Sources */,
+				78AE6A67248CA9B400F4A5E9 /* MusicMeta.swift in Sources */,
 				786A69DC248C8E6B001A29A2 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
