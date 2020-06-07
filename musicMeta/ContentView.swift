@@ -11,15 +11,17 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShareSheetShowing = false
+    @State private var hasSavedFileLocation = false
     var color1 = Color(red: 0.2, green: 0.2, blue: 0.2)
     var color2 = Color(red: 0.4, green: 0.4, blue: 0.4)
     let musicMeta = MusicMeta()
 
     func onClickShareButton(){
         isShareSheetShowing.toggle();
-        let url:String = "test"
-        let av = UIActivityViewController(activityItems: [url], applicationActivities:nil)
-        UIApplication.shared.windows.first?.rootViewController?.present(av, animated: true, completion:nil)
+        if(musicMeta.savedFileLocation != nil){
+            let activityView = UIActivityViewController(activityItems: [musicMeta.savedFileLocation!], applicationActivities: nil)
+            UIApplication.shared.windows.first?.rootViewController?.present(activityView, animated: true, completion:nil)
+        }
     }
     
     var body: some View {
@@ -46,6 +48,7 @@ struct ContentView: View {
                 
                 Button(action: {
                     self.musicMeta.generateMeta()
+                    self.hasSavedFileLocation = self.musicMeta.savedFileLocation != nil
                 }) {
                     HStack {
                         Image(systemName: "music.note.list")
@@ -59,21 +62,24 @@ struct ContentView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [self.color1, self.color2]), startPoint: .leading, endPoint: .trailing))
                     .cornerRadius(40)
                 }
-                Button(action: {
-                    self.onClickShareButton()
-                 }) {
-                     HStack {
-                         Image(systemName: "square.and.arrow.down")
-                             .font(.title)
-                         Text("Save as csv")
-                             .fontWeight(.semibold)
-                             .font(.callout)
+                
+                if(self.hasSavedFileLocation == true){
+                    Button(action: {
+                        self.onClickShareButton()
+                     }) {
+                         HStack {
+                             Image(systemName: "square.and.arrow.down")
+                                 .font(.title)
+                             Text("Save as csv")
+                                 .fontWeight(.semibold)
+                                 .font(.callout)
+                         }
+                         .padding()
+                         .foregroundColor(.white)
+                         .background(LinearGradient(gradient: Gradient(colors: [self.color1, self.color2]), startPoint: .leading, endPoint: .trailing))
+                         .cornerRadius(40)
                      }
-                     .padding()
-                     .foregroundColor(.white)
-                     .background(LinearGradient(gradient: Gradient(colors: [self.color1, self.color2]), startPoint: .leading, endPoint: .trailing))
-                     .cornerRadius(40)
-                 }
+                }
                 Spacer()
             }
         }
