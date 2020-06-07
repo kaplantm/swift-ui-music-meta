@@ -15,6 +15,8 @@
 		786A69E4248C8E6F001A29A2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 786A69E2248C8E6F001A29A2 /* LaunchScreen.storyboard */; };
 		786A69EF248C8E6F001A29A2 /* musicMetaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A69EE248C8E6F001A29A2 /* musicMetaTests.swift */; };
 		786A69FA248C8E6F001A29A2 /* musicMetaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A69F9248C8E6F001A29A2 /* musicMetaUITests.swift */; };
+		786A6A08248C9739001A29A2 /* CircleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A6A07248C9739001A29A2 /* CircleImage.swift */; };
+		786A6A0A248C99C3001A29A2 /* HeaderImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786A6A09248C99C3001A29A2 /* HeaderImage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		786A69F5248C8E6F001A29A2 /* musicMetaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = musicMetaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		786A69F9248C8E6F001A29A2 /* musicMetaUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = musicMetaUITests.swift; sourceTree = "<group>"; };
 		786A69FB248C8E6F001A29A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		786A6A07248C9739001A29A2 /* CircleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleImage.swift; sourceTree = "<group>"; };
+		786A6A09248C99C3001A29A2 /* HeaderImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderImage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +110,8 @@
 				786A69E2248C8E6F001A29A2 /* LaunchScreen.storyboard */,
 				786A69E5248C8E6F001A29A2 /* Info.plist */,
 				786A69DF248C8E6F001A29A2 /* Preview Content */,
+				786A6A07248C9739001A29A2 /* CircleImage.swift */,
+				786A6A09248C99C3001A29A2 /* HeaderImage.swift */,
 			);
 			path = musicMeta;
 			sourceTree = "<group>";
@@ -268,7 +274,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				786A69D8248C8E6B001A29A2 /* AppDelegate.swift in Sources */,
+				786A6A08248C9739001A29A2 /* CircleImage.swift in Sources */,
 				786A69DA248C8E6B001A29A2 /* SceneDelegate.swift in Sources */,
+				786A6A0A248C99C3001A29A2 /* HeaderImage.swift in Sources */,
 				786A69DC248C8E6B001A29A2 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
