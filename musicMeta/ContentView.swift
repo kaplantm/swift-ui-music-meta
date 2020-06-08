@@ -11,21 +11,32 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShareSheetShowing = false
-    @State private var hasSavedFileLocation = false
     var color1 = Color(red: 0.2, green: 0.2, blue: 0.2)
     var color2 = Color(red: 0.4, green: 0.4, blue: 0.4)
-    let musicMeta = MusicMeta()
+//    @State var musicMeta = MusicMeta()
+    @State private var songData : [SongItem] = []
+    @State private var musicMeta = MusicMeta()
+    @State private var isMusicAuthorized : Bool = MusicMeta.isMusicAuthorized
+    @State private var songStats : [String:String] = MusicMeta.generateStats(songData: [])
+
 
     func onClickShareButton(){
-        isShareSheetShowing.toggle();
-        if(musicMeta.savedFileLocation != nil){
-            let activityView = UIActivityViewController(activityItems: [musicMeta.savedFileLocation!], applicationActivities: nil)
+        let data = musicMeta.formatSongData(songData:songData)
+        let hasFile = musicMeta.saveToFiles(data)
+        
+        if(hasFile){
+            isShareSheetShowing.toggle();
+            let activityView = UIActivityViewController(activityItems: [musicMeta.fileLocation!], applicationActivities: nil)
             UIApplication.shared.windows.first?.rootViewController?.present(activityView, animated: true, completion:nil)
         }
     }
     
+    func onMusicAuthRequestComplete(isMusicAuthorized:Bool){
+        self.isMusicAuthorized = isMusicAuthorized
+    }
+    
     var body: some View {
-         GeometryReader { metrics in
+         GeometryReader { geometry in
             VStack {
                 HeaderImage(image: "darkbg")
                     .frame(height: 200).clipped().edgesIgnoringSafeArea(.top)
@@ -36,7 +47,7 @@ struct ContentView: View {
                   .padding(.bottom, -200)
 
                 VStack(alignment: .leading) {
-                  Text("MetaMusic")
+                    Text("MusicMeta")
                       .font(.title)
                   HStack(alignment: .top) {
                       Text("Generate And Export Music Your Music App Stats")
@@ -46,9 +57,28 @@ struct ContentView: View {
                 .padding()
 
                 
+                if(self.isMusicAuthorized == false){
+                    Button(action: {
+                        MusicMeta.requestMusicAuth(self.onMusicAuthRequestComplete)
+                    }) {
+                        HStack {
+                            Image(systemName: "music.house")
+                                .font(.title)
+                            Text("Allow Access To Music Library")
+                                .fontWeight(.semibold)
+                                .font(.callout)
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(LinearGradient(gradient: Gradient(colors: [self.color1, self.color2]), startPoint: .leading, endPoint: .trailing))
+                        .cornerRadius(40)
+                    }
+                }
+                else{
+                
                 Button(action: {
-                    self.musicMeta.generateMeta()
-                    self.hasSavedFileLocation = self.musicMeta.savedFileLocation != nil
+                    self.songData = self.musicMeta.generateSongData()
+                    self.songStats = MusicMeta.generateStats(songData: self.songData)
                 }) {
                     HStack {
                         Image(systemName: "music.note.list")
@@ -63,7 +93,108 @@ struct ContentView: View {
                     .cornerRadius(40)
                 }
                 
-                if(self.hasSavedFileLocation == true){
+                    
+                    if(self.songData.count > 0){
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                VStack() {
+                                     HStack {
+                                        Image(systemName: "music.note.list")
+                                            .font(.title)
+                                        Text("Most Played:")
+                                            .fontWeight(.semibold)
+                                            .font(.callout)
+                                        }
+                                    Text(self.songStats["mostPlayed"]!)
+                                       .fontWeight(.semibold)
+                                       .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                      Image(systemName: "music.note.list")
+                                          .font(.title)
+                                      Text("Most Skipped: ")
+                                          .fontWeight(.semibold)
+                                          .font(.callout)
+                                    }
+                                    Text(self.songStats["mostSkipped"]!)
+                                       .fontWeight(.semibold)
+                                       .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                       Image(systemName: "music.note.list")
+                                           .font(.title)
+                                       Text("Longest: ")
+                                           .fontWeight(.semibold)
+                                           .font(.callout)
+                                    }
+                                    Text(self.songStats["longest"]!)
+                                       .fontWeight(.semibold)
+                                       .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                    Image(systemName: "music.note.list")
+                                        .font(.title)
+                                    Text("Shortest: ")
+                                        .fontWeight(.semibold)
+                                        .font(.callout)
+                                      }
+                                    Text(self.songStats["shortest"]!)
+                                      .fontWeight(.semibold)
+                                      .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                       Image(systemName: "music.note.list")
+                                           .font(.title)
+                                       Text("Oldest Release: ")
+                                           .fontWeight(.semibold)
+                                           .font(.callout)
+                                                       }
+                                       Text(self.songStats["oldest"]!)
+                                          .fontWeight(.semibold)
+                                          .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                    Image(systemName: "music.note.list")
+                                        .font(.title)
+                                    Text("Newest Release: ")
+                                        .fontWeight(.semibold)
+                                        .font(.callout)
+                                     }
+                                     Text(self.songStats["newest"]!)
+                                        .fontWeight(.semibold)
+                                        .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                      Image(systemName: "music.note.list")
+                                          .font(.title)
+                                      Text("Newly Added: ")
+                                          .fontWeight(.semibold)
+                                          .font(.callout)
+                                  }
+                                  Text(self.songStats["recentlyAdded"]!)
+                                     .fontWeight(.semibold)
+                                     .font(.callout)
+                                }
+                                VStack() {
+                                    HStack {
+                                       Image(systemName: "music.note.list")
+                                           .font(.title)
+                                       Text("Earliest Added: ")
+                                           .fontWeight(.semibold)
+                                           .font(.callout)
+                                        }
+                                    Text(self.songStats["leastRecentlyAdded"]!)
+                                       .fontWeight(.semibold)
+                                       .font(.callout)
+                                }
+                            }
+                        }
                     Button(action: {
                         self.onClickShareButton()
                      }) {
@@ -79,6 +210,8 @@ struct ContentView: View {
                          .background(LinearGradient(gradient: Gradient(colors: [self.color1, self.color2]), startPoint: .leading, endPoint: .trailing))
                          .cornerRadius(40)
                      }
+
+                }
                 }
                 Spacer()
             }

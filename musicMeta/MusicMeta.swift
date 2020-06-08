@@ -8,50 +8,103 @@
 
 import Foundation
 import MediaPlayer
+import SwiftUI
 
-class MusicMeta {
+struct MusicMeta {
+    private let fileName = "musicMeta.csv"    
     let fileManager = FileManager.default
-    var savedFileLocation : URL? = nil
-    private let fileName = "musicMeta.csv"
-
-    static var isMusicAuthorized : Bool = false;
-    var songData : [SongItem] = []
+    var fileLocation : URL? {
+// Where we will write our data to. This early exits if it fails to get the directory.
+           guard let docDirectoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+           else { return nil}
+           return docDirectoryURL.appendingPathComponent(fileName)
+    }
+    static var isMusicAuthorized : Bool {
+        return MPMediaLibrary.authorizationStatus() == .authorized
+    };
     
-    func requestMusicAuth(_ callback: @escaping ()->()) {
+    static func requestMusicAuth(_ callback: @escaping (_ status:Bool)->()) {
         let status : MPMediaLibraryAuthorizationStatus = MPMediaLibrary.authorizationStatus()
        
        if(status == .notDetermined){
         MPMediaLibrary.requestAuthorization() { newStatus in
-            MusicMeta.isMusicAuthorized = newStatus == .authorized
-            callback()
+            callback(newStatus == .authorized)
            }
        }
        else{
-        MusicMeta.isMusicAuthorized = status == .authorized
-        callback()
+        if(status != .authorized){
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                if UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
+            }
+        }
+        callback(status == .authorized)
        }
     }
     
-    func generateMeta(){
-        if(MusicMeta.isMusicAuthorized == true){
-            generateSongData()
-            let formattedData = formatSongData()
-            print(formattedData)
-            saveToFiles(formattedData)
+     static func generateStats(songData:[SongItem]) -> [String:String]{
+        var dict : [String:String] = [
+            "mostPlayed": "Unknown",
+            "mostSkipped": "Unknown",
+            "longest": "Unknown",
+            "shortest": "Unknown",
+            "oldest": "Unknown",
+            "newest": "Unknown",
+            "recentlyAdded": "Unknown",
+            "leastRecentlyAdded": "Unknown",
+        ]
+        let arrayLength = songData.count
+        if(arrayLength < 1){
+            return dict
         }
-        else{
-            requestMusicAuth(generateMeta)
+    
+        if(arrayLength == 1){
+            let song = songData[0].stringDict
+            dict = [
+                "mostPlayed": song["playCount"]!,
+                "mostSkipped":song["skipCount"]!,
+                "longest": song["playbackDuration"]!,
+                "shortest": song["playbackDuration"]!,
+                "oldest": song["releaseDate"]!,
+                "newest": song["releaseDate"]!,
+                "recentlyAdded": song["dateAdded"]!,
+                "leastRecentlyAdded": song["dateAdded"]!
+            ]
+            return dict
         }
+        
+        var sortedArrayCopy = songData.sorted(by: { $0.playCount > $1.playCount })
+        dict["mostPlayed"] = sortedArrayCopy[0].stringDict["playCount"]! + " Plays - " + sortedArrayCopy[0].stringDict["title"]!
+        
+        sortedArrayCopy = songData.sorted(by: { $0.skipCount > $1.skipCount })
+        dict["mostSkipped"] = sortedArrayCopy[0].stringDict["skipCount"]! + " Skips - " + sortedArrayCopy[0].stringDict["title"]!
+ 
+        sortedArrayCopy = songData.sorted(by: { $0.playbackDuration > $1.playbackDuration })
+        dict["longest"] = sortedArrayCopy[0].stringDict["playbackDuration"]! + " Seconds - " + sortedArrayCopy[0].stringDict["title"]!
+        dict["shortest"] = sortedArrayCopy[arrayLength-1].stringDict["playbackDuration"]! + " Seconds - " + sortedArrayCopy[arrayLength-1].stringDict["title"]!
+
+        let dateArray : [Date] = songData.compactMap({ song in
+            song.releaseDate
+        }).sorted(by: { $0 > $1 })
+        dict["newest"] = "Released "+SongItem.dateToString(dateArray.first) + " - " + sortedArrayCopy[0].stringDict["title"]!
+        dict["oldest"] = "Released "+SongItem.dateToString(dateArray[dateArray.count-1]) + " - " + sortedArrayCopy[dateArray.count-1].stringDict["title"]!
+
+        sortedArrayCopy = songData.sorted(by: { $0.dateAdded > $1.dateAdded })
+        dict["leastRecentlyAdded"] = "Added "+sortedArrayCopy[0].stringDict["dateAdded"]! + " - " + sortedArrayCopy[0].stringDict["title"]!
+        dict["recentlyAdded"] = "Added "+sortedArrayCopy[arrayLength-1].stringDict["dateAdded"]! + " - " + sortedArrayCopy[arrayLength-1].stringDict["title"]!
+        
+        return dict
     }
     
-    func generateSongData() {
+    func generateSongData() -> [SongItem] {
       let myMediaQuery = MPMediaQuery.songs()
 //      let predicate = MPMediaPropertyPredicate(value: "Green Day", forProperty: MPMediaItemPropertyArtist)
 //      myMediaQuery.addFilterPredicate(predicate)
       let items : [MPMediaItem] = myMediaQuery.items ?? []
 
-        self.songData = items.map { entity in
-            return SongItem(song: entity)
+        return items.map { entity in
+            SongItem(song: entity)
         }
     }
     
@@ -66,24 +119,22 @@ class MusicMeta {
       }
     
     func formatStringArrayForCSV(array: [String]) -> String {
-        print("formatStringDictForCSV")
-        print(array)
         return array.reduce("") {
             (accumulation: String, nextValue: String) -> String in
             return accumulation + formatStringForCSV(value: nextValue) + ","
         }
      }
  
-    func formatSongData() -> String {
-        let fields : [String] = ["title","artist","albumTitle","playCount","dateAdded","genre","beatsPerMinute","playbackDuration","skipCount","isExplicitItem","releaseDate", "isCloudItem","artistPersistentID","persistentID","genrePersistentID"]
+    func formatSongData(songData:[SongItem]) -> String {
+        let fields = SongItem.fields;
         var csvString = fields.reduce("") {
             (accumulation: String, nextValue: String) -> String in
             return accumulation + nextValue.getWithCapitalizedFirstLetter() + ","
         }
         csvString.append("\n\n")
 
-        for songClass in self.songData {
-            print("in songData iterable", self.songData.count)
+        for songClass in songData {
+            print("in songData iterable", songData.count)
             let songFieldArray : [String] = songClass.asFieldsArray(fields: fields);
             csvString = csvString.appending("\(formatStringArrayForCSV(array: songFieldArray))\n")
          }
@@ -96,23 +147,16 @@ class MusicMeta {
         return paths[0]
     }
     
-   func saveToFiles(_ data: String) {
-       // Where we will write our data to. This early exits if it fails to get the directory.
-       guard let docDirectoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-       else { return }
-    
-        let fullFilePath = docDirectoryURL.appendingPathComponent(self.fileName)
-        do {
-            try data.write(to: fullFilePath, atomically: true, encoding: String.Encoding.utf8)
-            self.savedFileLocation = fullFilePath
-        } catch {
-          // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
-          self.savedFileLocation = nil
+   func saveToFiles(_ data: String) -> Bool {
+        if(fileLocation != nil){
+            do {
+                try data.write(to: fileLocation!, atomically: true, encoding: String.Encoding.utf8)
+                return true;
+            } catch {
+              // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
+                return false
+            }
         }
+        return false
    }
-    
-    
-    func export() {
-        print("export")
-    }
 }
